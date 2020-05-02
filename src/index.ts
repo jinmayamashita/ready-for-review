@@ -10,72 +10,76 @@ type Payload = {
 };
 
 const main = async (): Promise<void> => {
-  const token = core.getInput("repo-token", { required: true });
-  const inProgressLabel = core.getInput("in-progress-label", {
-    required: true,
-  });
-  const readyForReviewLabel = core.getInput("ready-for-review-label", {
-    required: true,
-  });
+  try {
+    const token = core.getInput("repo-token", { required: true });
+    const inProgressLabel = core.getInput("in-progress-label", {
+      required: true,
+    });
+    const readyForReviewLabel = core.getInput("ready-for-review-label", {
+      required: true,
+    });
 
-  const octokit = new github.GitHub(token);
-  const context = github.context;
-  const issueNumber = context.issue.number;
+    const octokit = new github.GitHub(token);
+    const context = github.context;
+    const issueNumber = context.issue.number;
 
-  // TODO: remove dependency relationship (octokit)
-  const addLabel = async ({
-    owner,
-    repo,
-    issue_number,
-    label,
-  }: Payload): Promise<void> => {
-    octokit.issues.addLabels({
+    // TODO: remove dependency relationship (octokit)
+    const addLabel = async ({
       owner,
       repo,
       issue_number,
-      labels: [label],
-    });
-  };
+      label,
+    }: Payload): Promise<void> => {
+      octokit.issues.addLabels({
+        owner,
+        repo,
+        issue_number,
+        labels: [label],
+      });
+    };
 
-  const removeLabel = async ({
-    owner,
-    repo,
-    issue_number,
-    label,
-  }: Payload): Promise<void> => {
-    octokit.issues.removeLabel({
+    const removeLabel = async ({
       owner,
       repo,
       issue_number,
-      name: label,
+      label,
+    }: Payload): Promise<void> => {
+      octokit.issues.removeLabel({
+        owner,
+        repo,
+        issue_number,
+        name: label,
+      });
+    };
+
+    // check active labels on this PR
+    const { data } = await octokit.issues.listLabelsOnIssue({
+      ...context.repo,
+      issue_number: issueNumber,
     });
-  };
 
-  // check active labels on this PR
-  const { data } = await octokit.issues.listLabelsOnIssue({
-    ...context.repo,
-    issue_number: issueNumber,
-  });
+    const isInProgress = data.find(({ name }) => name === inProgressLabel);
+    const isReadyForReview = data.find(
+      ({ name }) => name === readyForReviewLabel
+    );
 
-  const isInProgress = data.find(({ name }) => name === inProgressLabel);
-  const isReadyForReview = data.find(
-    ({ name }) => name === readyForReviewLabel
-  );
+    if (!isInProgress && !isReadyForReview) {
+      return;
+    }
 
-  if (!isInProgress && !isReadyForReview) {
-    return;
-  }
+    if (isInProgress) {
+      const payload = { ...context.repo, issue_number: issueNumber };
+      addLabel({ ...payload, label: readyForReviewLabel });
+      removeLabel({ ...payload, label: inProgressLabel });
+    }
 
-  if (isInProgress) {
-    const payload = { ...context.repo, issue_number: issueNumber };
-    addLabel({ ...payload, label: readyForReviewLabel });
-    removeLabel({ ...payload, label: inProgressLabel });
-  }
-
-  if (isReadyForReview) {
-    const payload = { ...context.repo, issue_number: issueNumber };
-    addLabel({ ...payload, label: inProgressLabel });
-    removeLabel({ ...payload, label: readyForReviewLabel });
+    if (isReadyForReview) {
+      const payload = { ...context.repo, issue_number: issueNumber };
+      addLabel({ ...payload, label: inProgressLabel });
+      removeLabel({ ...payload, label: readyForReviewLabel });
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 main();
