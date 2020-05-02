@@ -1,0 +1,17 @@
+name: 'Ready to Review'
+description: 'Swap Ready to Review, In progress labels '
+inputs: 
+  in-progress-label:
+    description: 'In progress labels'
+    required: true
+    default: 'In progress'
+  ready-for-review-label:
+    description: 'Ready for review labels'
+    required: true
+    default: 'Ready for review'
+  repo-token:
+    required: true
+    description: 'Github token'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

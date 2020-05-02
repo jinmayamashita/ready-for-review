@@ -1,0 +1,32 @@
+{
+  "name": "ready-for-review",
+  "version": "0.0.1",
+  "description": "",
+  "repository": "github:jinmayamashita/ready-for-review",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --no-deps --no-notify --respawn --transpile-only ./src",
+    "prebuild": "rm -rf ./dist",
+    "build": "tsc && ncc build -m -o dist",
+    "lint": "eslint --ext .js,.ts '*/**/*.{ts}'"
+  },
+  "keywords": [],
+  "author": "Jinma Yamashita",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "13.13.4",
+    "@typescript-eslint/eslint-plugin": "2.30.0",
+    "@typescript-eslint/parser": "2.30.0",
+    "@zeit/ncc": "^0.22.1",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-plugin-prettier": "3.1.3",
+    "prettier": "2.0.5",
+    "ts-node-dev": "1.0.0-pre.44",
+    "typescript": "3.8.3"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^2.1.1"
+  }
+}
