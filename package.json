@@ -8,6 +8,7 @@
     "dev": "ts-node-dev --no-deps --no-notify --respawn --transpile-only ./src",
     "prebuild": "rm -rf ./dist",
     "test": "jest",
+    "type": "tsc --noEmit",
     "build": "tsc && ncc build -m -o dist",
     "lint": "eslint --ext .js,.ts '*/**/*.{ts}'"
   },
