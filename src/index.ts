@@ -6,79 +6,74 @@ import { isLabelInPR } from "./utils/isLabelInPR";
 type Payload = {
   owner: string;
   repo: string;
-  issue_number: number;
-  label: string;
+  issueNumber: number;
 };
+
+const prepareOctokit = async ({ owner, repo, issueNumber }: Payload) => (
+  // TODO: any type for now. fix later
+  label: { labels: [string] } | { name: string },
+  fn: any
+): Promise<void> =>
+  fn({
+    owner,
+    repo,
+    issue_number: issueNumber,
+    ...label,
+  });
+
+const get = (name: string): string => core.getInput(name, { required: true });
 
 const main = async (): Promise<void> => {
   try {
-    const token = core.getInput("repo-token", { required: true });
-    const inProgressLabel = core.getInput("in-progress-label", {
-      required: true,
-    });
-    const readyForReviewLabel = core.getInput("ready-for-review-label", {
-      required: true,
-    });
-
+    const token = get("repo-token");
     const octokit = new github.GitHub(token);
     const context = github.context;
+
+    const inProgressLabel = get("in-progress-label");
+    const readyForReviewLabel = get("ready-for-review-label");
     const issueNumber = context.issue.number;
 
-    // TODO: remove dependency relationship (octokit)
-    const addLabel = async ({
+    const { owner, repo } = context.repo;
+
+    const labelFuncs = await prepareOctokit({
       owner,
       repo,
-      issue_number,
-      label,
-    }: Payload): Promise<void> => {
-      octokit.issues.addLabels({
-        owner,
-        repo,
-        issue_number,
-        labels: [label],
-      });
-    };
+      issueNumber,
+    });
 
-    const removeLabel = async ({
-      owner,
-      repo,
-      issue_number,
-      label,
-    }: Payload): Promise<void> => {
-      octokit.issues.removeLabel({
-        owner,
-        repo,
-        issue_number,
-        name: label,
-      });
-    };
+    const add = (label: string, fn = octokit.issues.addLabels): Promise<void> =>
+      labelFuncs({ labels: [label] }, fn);
 
-    // check active labels on this PR
+    const remove = (
+      label: string,
+      fn = octokit.issues.removeLabel
+    ): Promise<void> => labelFuncs({ name: label }, fn);
+
+    // check the labels in pr event on event
     const { data: labels } = await octokit.issues.listLabelsOnIssue({
       ...context.repo,
       issue_number: issueNumber,
     });
 
-    const isInProgressInLabels = isLabelInPR(labels, inProgressLabel);
-    const isReadyForReviewInLabels = isLabelInPR(labels, readyForReviewLabel);
+    const isInProgress = isLabelInPR(labels, inProgressLabel);
+    const isReadyForReview = isLabelInPR(labels, readyForReviewLabel);
 
-    if (!isInProgressInLabels && !isReadyForReviewInLabels) {
+    if (!isInProgress && !isReadyForReview) {
       return;
     }
 
-    if (isInProgressInLabels) {
-      const payload = { ...context.repo, issue_number: issueNumber };
-      addLabel({ ...payload, label: readyForReviewLabel });
-      removeLabel({ ...payload, label: inProgressLabel });
+    if (isInProgress) {
+      add(readyForReviewLabel);
+      remove(inProgressLabel);
     }
 
-    if (isReadyForReviewInLabels) {
-      const payload = { ...context.repo, issue_number: issueNumber };
-      addLabel({ ...payload, label: inProgressLabel });
-      removeLabel({ ...payload, label: readyForReviewLabel });
+    if (isReadyForReview) {
+      add(inProgressLabel);
+      remove(readyForReviewLabel);
     }
   } catch (error) {
     console.log(error);
   }
 };
+
 main();
