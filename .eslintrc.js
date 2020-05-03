@@ -12,6 +12,7 @@ module.exports = {
     }],
   },
   env: {
-    node: true
+    node: true,
+    jest: true
   },
 }
