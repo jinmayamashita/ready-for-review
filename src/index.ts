@@ -35,6 +35,8 @@ const main = async (): Promise<void> => {
 
     const { owner, repo } = context.repo;
 
+    core.info(github.context.eventName);
+
     const labelFuncs = await prepareOctokit({
       owner,
       repo,
