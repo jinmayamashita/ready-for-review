@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { isLabelInPR } from "./utils/isLabelInPR";
 
 type Payload = {
   owner: string;
@@ -53,27 +54,25 @@ const main = async (): Promise<void> => {
     };
 
     // check active labels on this PR
-    const { data } = await octokit.issues.listLabelsOnIssue({
+    const { data: labels } = await octokit.issues.listLabelsOnIssue({
       ...context.repo,
       issue_number: issueNumber,
     });
 
-    const isInProgress = data.find(({ name }) => name === inProgressLabel);
-    const isReadyForReview = data.find(
-      ({ name }) => name === readyForReviewLabel
-    );
+    const isInProgressInLabels = isLabelInPR(labels, inProgressLabel);
+    const isReadyForReviewInLabels = isLabelInPR(labels, readyForReviewLabel);
 
-    if (!isInProgress && !isReadyForReview) {
+    if (!isInProgressInLabels && !isReadyForReviewInLabels) {
       return;
     }
 
-    if (isInProgress) {
+    if (isInProgressInLabels) {
       const payload = { ...context.repo, issue_number: issueNumber };
       addLabel({ ...payload, label: readyForReviewLabel });
       removeLabel({ ...payload, label: inProgressLabel });
     }
 
-    if (isReadyForReview) {
+    if (isReadyForReviewInLabels) {
       const payload = { ...context.repo, issue_number: issueNumber };
       addLabel({ ...payload, label: inProgressLabel });
       removeLabel({ ...payload, label: readyForReviewLabel });
