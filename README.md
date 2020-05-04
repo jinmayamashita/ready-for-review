@@ -35,7 +35,7 @@ jobs:
     name: fooName
     steps:
     - name: label swapping
-      uses: jinmayamashita/ready-for-review@draft-debug
+      uses: jinmayamashita/ready-for-review@1.0.0
       with:
         in-progress-label: 'my InProgress label'
         ready-for-review-label: 'my ReadyForReview label'
