@@ -18,4 +18,4 @@ runs:
   main: 'dist/index.js'
 branding:
   icon: 'toggle-left'
-  color: 'gray-dark'
+  color: 'purple'
