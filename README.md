@@ -22,7 +22,7 @@ An action for automatically label swapping for draft pull requests.
 
 ### Example usage
 
-```
+```yml
 on:
   pull_request:
     types: [opened, ready_for_review]
