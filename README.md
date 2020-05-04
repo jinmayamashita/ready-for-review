@@ -1,5 +1,7 @@
 # Ready for review
 
+![demo](https://user-images.githubusercontent.com/9401060/80947621-825b9780-8e2b-11ea-9ed6-147ca8e3df4e.gif)
+
 An action for automatically label swapping for draft pull requests.
 
 [Draft pull requests](https://github.blog/2019-02-14-introducing-draft-pull-requests/) are available in public repositories with GitHub Free and GitHub Free for organizations, GitHub Pro.
