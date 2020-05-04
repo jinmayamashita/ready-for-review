@@ -41,6 +41,14 @@ const main = async (): Promise<void> => {
       issueNumber,
     });
 
+    const {
+      data: { draft },
+    } = await octokit.pulls.get({
+      owner,
+      repo,
+      pull_number: issueNumber,
+    });
+
     const add = (label: string, fn = octokit.issues.addLabels): Promise<void> =>
       labelFuncs({ labels: [label] }, fn);
 
@@ -58,21 +66,17 @@ const main = async (): Promise<void> => {
     const isInProgress = isLabelInPR(labels, inProgressLabel);
     const isReadyForReview = isLabelInPR(labels, readyForReviewLabel);
 
-    if (!isInProgress && !isReadyForReview) {
+    if (!draft && !isInProgress && !isReadyForReview) {
       return;
     }
 
-    if (isInProgress) {
-      add(readyForReviewLabel);
-      remove(inProgressLabel);
-    }
-
-    if (isReadyForReview) {
-      add(inProgressLabel);
-      remove(readyForReviewLabel);
-    }
+    return draft
+      ? // to draft
+        add(inProgressLabel) && remove(readyForReviewLabel)
+      : // to ready for review
+        add(readyForReviewLabel) && remove(inProgressLabel);
   } catch (error) {
-    console.log(error);
+    core.debug(`message: ${error}`);
   }
 };
 
