@@ -1,5 +1,6 @@
-name: 'Ready to Review'
-description: 'Swap Ready to Review, In progress labels '
+name: 'Ready for Review'
+description: 'An action for automatically label swapping for draft pull requests'
+author: 'Jinma Yamashita'
 inputs: 
   in-progress-label:
     description: 'In progress labels'
@@ -15,3 +16,6 @@ inputs:
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: 'toggle-left'
+  color: 'gray-dark'

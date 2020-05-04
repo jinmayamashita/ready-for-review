@@ -1,7 +1,7 @@
 {
   "name": "ready-for-review",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0",
+  "description": "An action for automatically label swapping for draft pull requests",
   "repository": "github:jinmayamashita/ready-for-review",
   "main": "dist/index.js",
   "scripts": {
