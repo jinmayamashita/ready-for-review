@@ -21,6 +21,30 @@ const prepareOctokit = async ({ owner, repo, issueNumber }: Payload) => (
     ...label,
   });
 
+type AddLabel = (
+  octokit: github.GitHub,
+  label: string,
+  requestOptions: { owner: string; repo: string; issue_number: number }
+) => void;
+const addLabel: AddLabel = (octokit, label, requestOptions) => {
+  octokit.issues.removeLabel({
+    ...requestOptions,
+    name: label,
+  });
+};
+
+type RemoveLabel = (
+  octokit: github.GitHub,
+  label: string,
+  requestOptions: { owner: string; repo: string; issue_number: number }
+) => void;
+const removeLabel: RemoveLabel = (octokit, label, requestOptions) => {
+  octokit.issues.removeLabel({
+    ...requestOptions,
+    name: label,
+  });
+};
+
 const get = (name: string): string => core.getInput(name, { required: true });
 
 const main = async (): Promise<void> => {
