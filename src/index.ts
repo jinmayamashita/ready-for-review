@@ -2,48 +2,8 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { isLabelInPR } from "./utils/isLabelInPR";
-
-type Payload = {
-  owner: string;
-  repo: string;
-  issueNumber: number;
-};
-
-const prepareOctokit = async ({ owner, repo, issueNumber }: Payload) => (
-  // TODO: any type for now. fix later
-  label: { labels: [string] } | { name: string },
-  fn: any
-): Promise<void> =>
-  fn({
-    owner,
-    repo,
-    issue_number: issueNumber,
-    ...label,
-  });
-
-type AddLabel = (
-  octokit: github.GitHub,
-  label: string,
-  requestOptions: { owner: string; repo: string; issue_number: number }
-) => void;
-const addLabel: AddLabel = (octokit, label, requestOptions) => {
-  octokit.issues.removeLabel({
-    ...requestOptions,
-    name: label,
-  });
-};
-
-type RemoveLabel = (
-  octokit: github.GitHub,
-  label: string,
-  requestOptions: { owner: string; repo: string; issue_number: number }
-) => void;
-const removeLabel: RemoveLabel = (octokit, label, requestOptions) => {
-  octokit.issues.removeLabel({
-    ...requestOptions,
-    name: label,
-  });
-};
+import { addLabels } from "./utils/addLabels";
+import { removeLabel } from "./utils/removeLabel";
 
 const get = (name: string): string => core.getInput(name, { required: true });
 
@@ -59,12 +19,6 @@ const main = async (): Promise<void> => {
 
     const { owner, repo } = context.repo;
 
-    const labelFuncs = await prepareOctokit({
-      owner,
-      repo,
-      issueNumber,
-    });
-
     const {
       data: { draft },
     } = await octokit.pulls.get({
@@ -72,14 +26,6 @@ const main = async (): Promise<void> => {
       repo,
       pull_number: issueNumber,
     });
-
-    const add = (label: string, fn = octokit.issues.addLabels): Promise<void> =>
-      labelFuncs({ labels: [label] }, fn);
-
-    const remove = (
-      label: string,
-      fn = octokit.issues.removeLabel
-    ): Promise<void> => labelFuncs({ name: label }, fn);
 
     // check the labels in pr event on event
     const { data: labels } = await octokit.issues.listLabelsOnIssue({
@@ -96,9 +42,27 @@ const main = async (): Promise<void> => {
 
     return draft
       ? // to draft
-        add(inProgressLabel) && remove(readyForReviewLabel)
+        addLabels(octokit.issues.addLabels, inProgressLabel, {
+          owner,
+          repo,
+          issue_number: issueNumber,
+        }) &&
+          removeLabel(octokit.issues.removeLabel, readyForReviewLabel, {
+            owner,
+            repo,
+            issue_number: issueNumber,
+          })
       : // to ready for review
-        add(readyForReviewLabel) && remove(inProgressLabel);
+        addLabels(octokit.issues.addLabels, readyForReviewLabel, {
+          owner,
+          repo,
+          issue_number: issueNumber,
+        }) &&
+          removeLabel(octokit.issues.removeLabel, inProgressLabel, {
+            owner,
+            repo,
+            issue_number: issueNumber,
+          });
   } catch (error) {
     core.debug(`message: ${error}`);
   }
