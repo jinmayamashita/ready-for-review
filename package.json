@@ -16,7 +16,7 @@
   "author": "Jinma Yamashita",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "26.0.0",
+    "@types/jest": "26.0.2",
     "@types/node": "13.13.8",
     "@typescript-eslint/eslint-plugin": "3.4.0",
     "@typescript-eslint/parser": "3.4.0",
