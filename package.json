@@ -27,7 +27,7 @@
     "jest": "26.1.0",
     "prettier": "2.0.5",
     "ts-jest": "26.1.2",
-    "ts-node-dev": "1.0.0-pre.51",
+    "ts-node-dev": "1.0.0-pre.52",
     "typescript": "3.9.6"
   },
   "dependencies": {
