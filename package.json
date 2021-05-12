@@ -17,7 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "26.0.23",
-    "@types/node": "13.13.51",
+    "@types/node": "13.13.52",
     "@typescript-eslint/eslint-plugin": "4.23.0",
     "@typescript-eslint/parser": "4.23.0",
     "@zeit/ncc": "0.22.3",
